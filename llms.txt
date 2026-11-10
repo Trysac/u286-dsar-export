@@ -1,0 +1,16 @@
+# dsar-export
+
+> Assemble a data subject access request export from pluggable data sources: matched records, third-party redaction, a byte-reproducible ZIP with a SHA-256 manifest Python package `trysac-dsar-export`, import name `dsar_export`, MIT licensed,
+> Python >= 3.10, no runtime dependencies.
+
+## Docs
+
+- [README](README.md): problem, install, usage example
+- [AGENTS](AGENTS.md): commands, folder map, conventions, limits
+- [Architecture](docs/ARCHITECTURE.md): shape of the package and its public API
+- [Testing](docs/TESTING.md): how to run and extend the tests
+
+## Optional
+
+- [Stack](docs/STACK.md): tools used and discarded
+- [Changelog](CHANGELOG.md): release history
