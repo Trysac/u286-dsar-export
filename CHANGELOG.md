@@ -9,4 +9,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added dsar_export: assemble DSAR exports from pluggable sources with redaction, reproducible ZIP, and SHA-256 manifest.
 - Initial project structure from the factory utility template.

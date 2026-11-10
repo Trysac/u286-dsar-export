@@ -14,8 +14,10 @@ caller code --> dsar_export (public API in __init__.py)
 
 - **Public API**: the names listed in `__all__` of `src/dsar_export/__init__.py`. Anything else is
   internal and may change without a major version.
-- **Errors**: invalid input raises built-in exceptions (`ValueError`, `TypeError`) with a clear
-  message; the library never prints or exits.
+- **Errors**: invalid input raises `DsarError` with a `code` attribute (`invalid_query`,
+  `invalid_source`, `invalid_record`, `invalid_clock`, `bundle_too_large`); messages are short and
+  never contain identifiers or record values. Per-source failures are reported in
+  `ExportResult.manifest['errors']` instead of being raised; the library never prints or exits.
 - **Side effects**: none. If a feature needs I/O, isolate it in its own module behind a small
   interface and record the choice in an ADR.
 
