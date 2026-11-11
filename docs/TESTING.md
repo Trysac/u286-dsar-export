@@ -3,27 +3,28 @@
 ## Running
 
 ```sh
-uv run pytest --cov=dsar_export   # tests with coverage report
-uv run python scripts/check.py      # every gate, as CI and the factory run it
+pytest tests/test_dsar_export.py
 ```
 
 ## Policy
 
-- Branch coverage of `src/dsar_export` must stay at or above 80 %; the gate fails below it.
-- Tests exercise the public API (`import dsar_export`) and assert every observable effect:
-  return values, raised exceptions and their messages.
-- Each bug fix starts with a failing test that reproduces it.
-- Tests are deterministic: no network, no wall clock, no dependence on test order.
+Tests exercise the public API through `dsar_export` and assert observable results: ZIP entry names and bytes, manifest values, raised `DsarError` codes, and progress events. They use synthetic in-memory records and a fixed timezone-aware clock; no network or external services are involved.
 
 ## Tiers
 
-- Local tier (every gate run, coverage measured here): unit and property tests, plus conformance on small
-  fixtures kept in the repository.
-- CI tier: conformance that needs an external tool or a download. Mark them `@pytest.mark.conformance`; `scripts/check.py` deselects them locally
-  (unless `FABRICA_CI=1`). The CI `conformance` job sets `FABRICA_CI=1` and runs the full suite. Tools are installed
-  by the optional `ci/conformance-setup.sh` (bash, CI only; verify every download against a pinned SHA-256), and
-  tagged tests skip cleanly when their tool is missing.
+The suite is a single test module. The repository listing contains no separate conformance tier, external tool download, or `conftest.py` fixture file.
 
 ## Layout
 
-`tests/test_<module>.py` mirrors each public module. Shared fixtures go in `tests/conftest.py`.
+`tests/test_dsar_export.py` covers:
+
+- `test_export_single_source` — a single `InMemorySource` produces `README.txt`, `data/crm.json`, and `manifest.json`; asserts the exact JSON bytes for `data/crm.json` and the expected manifest values.
+- `test_reproducible_bundle` — two exports with the same inputs and clock return identical `result.bundle` bytes.
+- `test_source_failure_discards_partial_records` — a source raising `RuntimeError("db down")` sets `complete=False`, records `source_failed`, keeps other sources, and does not include the exception text or a partial file in the bundle.
+- `test_redaction` — `redact_fields=["counterparty_email"]` replaces that value with `[redacted: third party]` and leaves other fields unchanged.
+- `test_too_many_records` — exceeding `max_records_per_source` records `too_many_records` and sets `complete=False`.
+- `test_bundle_too_large` — a bundle above `max_bundle_bytes` raises `DsarError` with code `bundle_too_large`.
+- `test_invalid_query_empty` — `SubjectQuery({})` raises `DsarError` with code `invalid_query`.
+- `test_invalid_record_nan` — a record containing `float("nan")` raises `DsarError` with code `invalid_record`.
+- `test_custom_source_invalid_record` — a custom `DataSource` yielding an invalid record raises `DsarError` with code `invalid_record`.
+- `test_invalid_clock_naive` — a clock returning a naive `datetime` raises `DsarError` with code `invalid_clock`.
